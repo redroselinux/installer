@@ -1,29 +1,11 @@
 #!/usr/bin/env bash
-#-------------------------------------------------------------------------
-#   █████╗ ██████╗  ██████╗██╗  ██╗████████╗██╗████████╗██╗   ██╗███████╗
-#  ██╔══██╗██╔══██╗██╔════╝██║  ██║╚══██╔══╝██║╚══██╔══╝██║   ██║██╔════╝
-#  ███████║██████╔╝██║     ███████║   ██║   ██║   ██║   ██║   ██║███████╗
-#  ██╔══██║██╔══██╗██║     ██╔══██║   ██║   ██║   ██║   ██║   ██║╚════██║
-#  ██║  ██║██║  ██║╚██████╗██║  ██║   ██║   ██║   ██║   ╚██████╔╝███████║
-#  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝   ╚═╝    ╚═════╝ ╚══════╝
-#-------------------------------------------------------------------------
+#
 #github-action genshdoc
 #
 # @file Preinstall
 # @brief Contains the steps necessary to configure and pacstrap the install to selected drive. 
 echo -ne "
--------------------------------------------------------------------------
-   █████╗ ██████╗  ██████╗██╗  ██╗████████╗██╗████████╗██╗   ██╗███████╗
-  ██╔══██╗██╔══██╗██╔════╝██║  ██║╚══██╔══╝██║╚══██╔══╝██║   ██║██╔════╝
-  ███████║██████╔╝██║     ███████║   ██║   ██║   ██║   ██║   ██║███████╗
-  ██╔══██║██╔══██╗██║     ██╔══██║   ██║   ██║   ██║   ██║   ██║╚════██║
-  ██║  ██║██║  ██║╚██████╗██║  ██║   ██║   ██║   ██║   ╚██████╔╝███████║
-  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝   ╚═╝    ╚═════╝ ╚══════╝
--------------------------------------------------------------------------
-                    Automated Arch Linux Installer
--------------------------------------------------------------------------
-
-Setting up mirrors for optimal download
+\_Setting up mirrors for optimal download
 "
 source $CONFIGS_DIR/setup.conf
 iso=$(curl -4 ifconfig.co/country-iso)
@@ -34,23 +16,11 @@ setfont ter-v22b
 sed -i 's/^#ParallelDownloads/ParallelDownloads/' /etc/pacman.conf
 pacman -S --noconfirm --needed reflector rsync grub
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
-echo -ne "
--------------------------------------------------------------------------
-                    Setting up $iso mirrors for faster downloads
--------------------------------------------------------------------------
-"
 reflector -a 48 -c $iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 mkdir /mnt &>/dev/null # Hiding error message if any
-echo -ne "
--------------------------------------------------------------------------
-                    Installing Prerequisites
--------------------------------------------------------------------------
-"
 pacman -S --noconfirm --needed gptfdisk btrfs-progs glibc
 echo -ne "
--------------------------------------------------------------------------
-                    Formating Disk
--------------------------------------------------------------------------
+\_Formating Disk
 "
 umount -A --recursive /mnt # make sure everything is unmounted before we start
 # disk prep
@@ -68,9 +38,7 @@ partprobe ${DISK} # reread partition table to ensure it is correct
 
 # make filesystems
 echo -ne "
--------------------------------------------------------------------------
-                    Creating Filesystems
--------------------------------------------------------------------------
+\_Creating Filesystems
 "
 # @description Creates the btrfs subvolumes. 
 createsubvolumes () {
@@ -147,9 +115,7 @@ if ! grep -qs '/mnt' /proc/mounts; then
     reboot now
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    Arch Install on Main Drive
--------------------------------------------------------------------------
+\_Arch Install on Main Drive
 "
 pacstrap /mnt base base-devel linux linux-firmware vim nano sudo archlinux-keyring wget libnewt --noconfirm --needed
 echo "keyserver hkp://keyserver.ubuntu.com" >> /mnt/etc/pacman.d/gnupg/gpg.conf
@@ -162,9 +128,7 @@ echo "
 "
 cat /mnt/etc/fstab
 echo -ne "
--------------------------------------------------------------------------
-                    GRUB BIOS Bootloader Install & Check
--------------------------------------------------------------------------
+\_GRUB BIOS Bootloader Install & Check
 "
 if [[ ! -d "/sys/firmware/efi" ]]; then
     grub-install --boot-directory=/mnt/boot ${DISK}
@@ -172,9 +136,7 @@ else
     pacstrap /mnt efibootmgr --noconfirm --needed
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    Checking for low memory systems <8G
--------------------------------------------------------------------------
+\_Checking for low memory systems <8G
 "
 TOTAL_MEM=$(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*')
 if [[  $TOTAL_MEM -lt 8000000 ]]; then
@@ -189,8 +151,3 @@ if [[  $TOTAL_MEM -lt 8000000 ]]; then
     # The line below is written to /mnt/ but doesn't contain /mnt/, since it's just / for the system itself.
     echo "/opt/swap/swapfile	none	swap	sw	0	0" >> /mnt/etc/fstab # Add swap to fstab, so it KEEPS working after installation.
 fi
-echo -ne "
--------------------------------------------------------------------------
-                    SYSTEM READY FOR 1-setup.sh
--------------------------------------------------------------------------
-"
