@@ -3,31 +3,15 @@
 #
 # @file Setup
 # @brief Configures installed system, installs base packages, and creates user. 
-echo -ne "
--------------------------------------------------------------------------
-   █████╗ ██████╗  ██████╗██╗  ██╗████████╗██╗████████╗██╗   ██╗███████╗
-  ██╔══██╗██╔══██╗██╔════╝██║  ██║╚══██╔══╝██║╚══██╔══╝██║   ██║██╔════╝
-  ███████║██████╔╝██║     ███████║   ██║   ██║   ██║   ██║   ██║███████╗
-  ██╔══██║██╔══██╗██║     ██╔══██║   ██║   ██║   ██║   ██║   ██║╚════██║
-  ██║  ██║██║  ██║╚██████╗██║  ██║   ██║   ██║   ██║   ╚██████╔╝███████║
-  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝   ╚═╝    ╚═════╝ ╚══════╝
--------------------------------------------------------------------------
-                    Automated Arch Linux Installer
-                        SCRIPTHOME: ArchTitus
--------------------------------------------------------------------------
-"
+
 source $HOME/ArchTitus/configs/setup.conf
 echo -ne "
--------------------------------------------------------------------------
-                    Network Setup 
--------------------------------------------------------------------------
+\_Network Setup
 "
 pacman -S --noconfirm --needed networkmanager dhclient
 systemctl enable --now NetworkManager
 echo -ne "
--------------------------------------------------------------------------
-                    Setting up mirrors for optimal download 
--------------------------------------------------------------------------
+\_Setting up mirrors for optimal download
 "
 pacman -S --noconfirm --needed pacman-contrib curl
 pacman -S --noconfirm --needed reflector rsync grub arch-install-scripts git
@@ -35,11 +19,7 @@ cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
 
 nc=$(grep -c ^processor /proc/cpuinfo)
 echo -ne "
--------------------------------------------------------------------------
-                    You have " $nc" cores. And
-			changing the makeflags for "$nc" cores. Aswell as
-				changing the compression settings.
--------------------------------------------------------------------------
+You have " $nc" cores. And changing the makeflags for "$nc" cores. Aswell as changing the compression settings.
 "
 TOTAL_MEM=$(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*')
 if [[  $TOTAL_MEM -gt 8000000 ]]; then
@@ -47,9 +27,7 @@ sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /etc/makepkg.conf
 sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /etc/makepkg.conf
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    Setup Language to US and set locale  
--------------------------------------------------------------------------
+\_Setup language to US and set locale
 "
 sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
@@ -72,9 +50,7 @@ sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 pacman -Sy --noconfirm --needed
 
 echo -ne "
--------------------------------------------------------------------------
-                    Installing Base System  
--------------------------------------------------------------------------
+\_Installing base system
 "
 # sed $INSTALL_TYPE is using install type to check for MINIMAL installation, if it's true, stop
 # stop the script and move on, not installing any more packages below that line
@@ -90,9 +66,7 @@ if [[ ! $DESKTOP_ENV == server ]]; then
   done
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    Installing Microcode
--------------------------------------------------------------------------
+\_Installing microcode
 "
 # determine processor type and install microcode
 proc_type=$(lscpu)
@@ -107,9 +81,7 @@ elif grep -E "AuthenticAMD" <<< ${proc_type}; then
 fi
 
 echo -ne "
--------------------------------------------------------------------------
-                    Installing Graphics Drivers
--------------------------------------------------------------------------
+\_Installing graphics drivers
 "
 # Graphics Drivers find and install
 gpu_type=$(lspci)
@@ -164,9 +136,7 @@ echo "password=${password,,}" >> ${HOME}/ArchTitus/configs/setup.conf
     echo "NAME_OF_MACHINE=${name_of_machine,,}" >> ${HOME}/ArchTitus/configs/setup.conf
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    Adding User
--------------------------------------------------------------------------
+\_Adding user
 "
 if [ $(whoami) = "root"  ]; then
     groupadd libvirt
@@ -194,7 +164,5 @@ if [[ ${FS} == "luks" ]]; then
     mkinitcpio -p linux
 fi
 echo -ne "
--------------------------------------------------------------------------
-                    SYSTEM READY FOR 2-user.sh
--------------------------------------------------------------------------
+\_System ready for 2-user.sh
 "
